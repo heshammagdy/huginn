@@ -124,15 +124,15 @@ module Agents
       incoming_events.each do |event|
         outgoing = interpolated(event)['payload'].presence || {}
         if boolify(interpolated['no_merge'])
-          handle outgoing, event.payload
+          handle outgoing, event.payload, headers(interpolated(event.payload)[:headers])
         else
-          handle outgoing.merge(event.payload), event.payload
+          handle outgoing.merge(event.payload), event.payload, headers(interpolated(event.payload)[:headers])
         end
       end
     end
 
     def check
-      handle interpolated['payload'].presence || {}
+      handle interpolated['payload'].presence || {}, headers
     end
 
     private
@@ -160,9 +160,8 @@ module Agents
       }
     end
 
-    def handle(data, payload = {})
+    def handle(data, payload = {}, headers)
       url = interpolated(payload)[:post_url]
-      headers = headers()
 
       case method
       when 'get', 'delete'
